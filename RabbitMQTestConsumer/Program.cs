@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.MessagePatterns;
 using RabbitMQTestShared;
 
 namespace RabbitMQTestConsumer
@@ -22,17 +23,16 @@ namespace RabbitMQTestConsumer
             using (var amqp = new AmqpConnection())
             using (_channel = amqp.Connect(_settings))
             {
-                var consumer = new EventingBasicConsumer(_channel);
-                consumer.Received += (ch, ea) =>
+                Subscription sub = new Subscription(_channel, _settings.queueName);
+                foreach (BasicDeliverEventArgs e in sub)
                 {
-                    var body = ea.Body;
-                    // ... process the message
-                    _channel.BasicAck(ea.DeliveryTag, false);
-                };
+                    var asText = Encoding.UTF8.GetString(e.Body);
+                    Console.WriteLine(asText);
 
-                String consumerTag = _channel.BasicConsume(_settings.queueName, false, consumer);
+                    // Must acknowledge
+                    sub.Ack(e);
+                }
 
-                Console.WriteLine(consumerTag);
                 Console.ReadLine();
             }
 

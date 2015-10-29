@@ -35,6 +35,8 @@ namespace RabbitMQTestShared
 
         public void Dispose()
         {
+            _channel.Close(200, "Goodbye");
+            _connect.Close();
             _connect.Dispose();
         }
     }
