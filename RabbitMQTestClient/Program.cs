@@ -5,41 +5,44 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQTestShared;
 
 namespace RabbitMQTestClient
 {
     class Program
     {
         private static IModel _channel;
-        private static string _exchangeName = "TestExchange";
-        private static string _queueName = "TestQueue";
-        private static string _routingKey = "98hf9rhr947hrf48hoial34h";
+        private static AmqpSettings _settings;
 
         public static void Main()
         {
-            _channel = AmqpConnection.OpenChannel();
+            _settings = new AmqpSettings();
 
-            _channel.ExchangeDeclare(_exchangeName, ExchangeType.Direct);
-            _channel.QueueDeclare(_queueName, false, false, false, null);
-            _channel.QueueBind(_queueName, _exchangeName, _routingKey, null);
+            using (var amqp = new AmqpConnection())
+            using (_channel = amqp.Connect(_settings))
+            {
+                _channel.ExchangeDeclare(_settings.exchangeName, ExchangeType.Direct);
+                _channel.QueueDeclare(_settings.queueName, false, false, false, null);
+                _channel.QueueBind(_settings.queueName, _settings.exchangeName, _settings.routingKey, null);
 
-            var t = new Timer(TimerCallback, _channel, 0, 2000);
+                var t = new Timer(TimerCallback, _channel, 0, 2000);
 
-            Console.ReadLine();
+                Console.ReadLine();
+            }
         }
 
         private static void TimerCallback(Object o)
         {
             Console.WriteLine("Sending message: " + DateTime.Now);
+
             IModel model = (IModel)o;
 
             lock (model)
             {
                 byte[] messageBodyBytes = System.Text.Encoding.UTF8.GetBytes(string.Format("Time: {0}", DateTime.Now.ToLongTimeString()));
-                model.BasicPublish(_exchangeName, _routingKey, null, messageBodyBytes);
+                model.BasicPublish(_settings.exchangeName, _settings.routingKey, null, messageBodyBytes);
             }
 
-            GC.Collect();
         }
 
     }
