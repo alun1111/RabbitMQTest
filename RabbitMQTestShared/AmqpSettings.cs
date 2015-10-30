@@ -10,7 +10,7 @@ namespace RabbitMQTestShared
     {
         public string user = "testuser";
         public string password = "testpassword";
-        public string hostName = "10.128.13.8";
+        public string hostName = "10.128.13.9";
         public string exchangeName = "TestExchange";
         public string queueName = "TestQueue";
         public string routingKey = "98hf9rhr947hrf48hoial34h";

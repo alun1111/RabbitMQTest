@@ -40,7 +40,15 @@ namespace RabbitMQTestClient
             lock (model)
             {
                 byte[] messageBodyBytes = System.Text.Encoding.UTF8.GetBytes(string.Format("Time: {0}", DateTime.Now.ToLongTimeString()));
-                model.BasicPublish(_settings.exchangeName, _settings.routingKey, null, messageBodyBytes);
+
+                try
+                {
+                    model.BasicPublish(_settings.exchangeName, _settings.routingKey, null, messageBodyBytes);
+                }
+                catch (Exception)
+                {
+                    
+                }
             }
 
         }

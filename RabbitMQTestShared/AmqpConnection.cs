@@ -19,13 +19,17 @@ namespace RabbitMQTestShared
                 Password = settings.password
                 ,
                 HostName = settings.hostName
+                ,
+                AutomaticRecoveryEnabled = true
+                ,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
             };
 
             _connect = factory.CreateConnection();
 
             _channel = _connect.CreateModel();
 
-            _channel.ExchangeDeclare(settings.hostName, ExchangeType.Direct);
+            _channel.ExchangeDeclare(settings.exchangeName, ExchangeType.Direct);
             _channel.QueueDeclare(settings.queueName, false, false, false, null);
             _channel.QueueBind(settings.queueName, settings.exchangeName, settings.routingKey, null);
 
